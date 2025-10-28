@@ -1,0 +1,27 @@
+name: Manual Bots Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bots-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r university_bots/requirements.txt
+      - name: Lint import
+        run: |
+          python -c "import selenium, webdriver_manager"
+      - name: Dry run UCT bot import
+        run: |
+          python -c "import university_bots.uct_bot as ub; print('UCT bot loaded')"
+      - name: Dry run Gmail bot import
+        run: |
+          python -c "import university_bots.gmail_bot as gb; print('Gmail bot loaded')"
