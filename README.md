@@ -1,72 +1,32 @@
 # Ufunda App Orchestration
 
 ## Overview
-University application workflow automation with orchestrator and bot templates for Gmail and university portals.
+Automation orchestrator with bots for Gmail account creation and university applications.
 
-This repository contains a modular automation system designed to streamline university applications by orchestrating interactions between email (Gmail) and university application portals.
+## New Bots Added
+- Gmail bot: university_bots/gmail_bot.py (Selenium-based Gmail account creator)
+- UCT bot: university_bots/uct_bot.py (Selenium sample for UCT application flow)
 
-## Architecture
+## Quick Start
+1) Python 3.10+
+2) Install dependencies for university bots:
+   pip install -r university_bots/requirements.txt
+3) Run Gmail bot test:
+   python university_bots/gmail_bot.py
+4) Run UCT bot sample:
+   python university_bots/uct_bot.py
 
-The system consists of three main components:
+## Environment Variables (optional)
+- UCT_PORTAL_URL: Override UCT portal URL (default: https://www.uct.ac.za/apply)
+- UCT_USERNAME, UCT_PASSWORD: Portal credentials if login is required
+- UCT_FIRST_NAME, UCT_LAST_NAME, UCT_EMAIL, UCT_PHONE, UCT_ID, UCT_PROGRAM
+- UCT_DOC_ID, UCT_DOC_TRANSCRIPT: Paths to files for uploads
 
-1. **Master Orchestrator** - FastAPI-based central controller
-2. **Gmail Bot** - Monitors inbox for university emails and extracts application links
-3. **University Bots** - Portal-specific automation for completing applications
+## Testing and CI
+- GitHub Actions: Use Actions tab to run workflows if configured
+- Railway: Trigger deployment from Railway dashboard if configured
+- Logs: gmail_bot.log and uct_bot.log are generated locally by bots
 
-## Folder Structure
-
-```
-ufunda-app-orchestration/
-├── orchestrator/
-│   ├── master_orchestrator.py    # Main FastAPI orchestration server
-│   ├── requirements.txt          # Python dependencies
-│   └── config.py                 # Configuration settings
-├── gmail_bot/
-│   ├── gmail_monitor.py          # Gmail API integration
-│   ├── email_parser.py           # Parse university emails
-│   └── requirements.txt
-├── university_bots/
-│   ├── base_bot.py               # Base class for university bots
-│   ├── bot_template.py           # Template for new university bots
-│   ├── requirements.txt
-│   └── bots/
-│       └── example_university_bot.py
-├── shared/
-│   ├── database.py               # Shared database models
-│   └── utils.py                  # Common utilities
-├── README.md
-└── setup_instructions.md
-```
-
-## Key Features
-
-- **Centralized Orchestration**: Master orchestrator manages all bot activities
-- **Email Monitoring**: Automatic detection of university application emails
-- **Portal Automation**: Browser automation for filling application forms
-- **Extensible Architecture**: Easy to add new university portal integrations
-- **Status Tracking**: Real-time monitoring of application progress
-
-## Workflow
-
-1. Gmail bot monitors inbox for university invitation emails
-2. Extracts application links and forwards to orchestrator
-3. Orchestrator identifies the university and triggers appropriate bot
-4. University bot navigates portal and completes application
-5. Status updates sent back to orchestrator
-6. Orchestrator logs completion and notifies user
-
-## Technology Stack
-
-- **Orchestrator**: FastAPI, Python
-- **Gmail Integration**: Google Gmail API
-- **Browser Automation**: Selenium/Playwright
-- **Database**: SQLite/PostgreSQL
-- **Task Queue**: Redis (optional for scaling)
-
-## Getting Started
-
-Detailed setup instructions are available in `setup_instructions.md`
-
-## Development Status
-
-This is an active development project for the Ufunda university application automation system.
+## Notes
+- Gmail signup may use anti-bot checks; this is best-effort automation for dev/test.
+- Adapt selectors/flows as university portals evolve.
