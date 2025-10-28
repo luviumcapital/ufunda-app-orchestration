@@ -1,32 +1,35 @@
 # Ufunda App Orchestration
-
 ## Overview
-Automation orchestrator with bots for Gmail account creation and university applications.
+Automation orchestrator with bots for Gmail account creation and university and bursary applications.
 
 ## New Bots Added
 - Gmail bot: university_bots/gmail_bot.py (Selenium-based Gmail account creator)
 - UCT bot: university_bots/uct_bot.py (Selenium sample for UCT application flow)
+- Wits bot: university_bots/wits_bot.py (Wits application automation)
+- UP bot: university_bots/up_bot.py (UP application automation)
+- Stellenbosch bot: university_bots/stellenbosch_bot.py
+- UJ bot: university_bots/uj_bot.py (University of Johannesburg application automation)
+- NSFAS bot: university_bots/nsfas_bot.py (NSFAS/SETA bursary automation)
 
 ## Quick Start
 1) Python 3.10+
 2) Install dependencies for university bots:
    pip install -r university_bots/requirements.txt
-3) Run Gmail bot test:
-   python university_bots/gmail_bot.py
-4) Run UCT bot sample:
-   python university_bots/uct_bot.py
+3) Run orchestrator in parallel across bots (includes uj and nsfas now):
+   python -c "from orchestrator.master_orchestrator import run_parallel_bots; import json; print(json.dumps(run_parallel_bots({'first_name':'Test','last_name':'User','email':'test@example.com'}), indent=2))"
+4) Run individual bots:
+   python -c "from university_bots.uj_bot import run; print(run(None, {'email':'test@example.com'}))"
+   python -c "from university_bots.nsfas_bot import run; print(run(None, {'email':'test@example.com'}))"
 
 ## Environment Variables (optional)
-- UCT_PORTAL_URL: Override UCT portal URL (default: https://www.uct.ac.za/apply)
-- UCT_USERNAME, UCT_PASSWORD: Portal credentials if login is required
-- UCT_FIRST_NAME, UCT_LAST_NAME, UCT_EMAIL, UCT_PHONE, UCT_ID, UCT_PROGRAM
-- UCT_DOC_ID, UCT_DOC_TRANSCRIPT: Paths to files for uploads
+- General: BOT_LOG_LEVEL, ARTIFACT_DIR
+- UJ: provide uj_username, uj_password OR email, id_number, mobile; uploads dict for files; fee_waiver flag
+- NSFAS: nsfas_email, nsfas_password OR email, id_number, mobile; uploads dict; otp when required
 
 ## Testing and CI
 - GitHub Actions: Use Actions tab to run workflows if configured
-- Railway: Trigger deployment from Railway dashboard if configured
-- Logs: gmail_bot.log and uct_bot.log are generated locally by bots
+- Logs: Bots emit structured events consumable by orchestrator; artifacts written to artifacts/ directory
 
 ## Notes
-- Gmail signup may use anti-bot checks; this is best-effort automation for dev/test.
-- Adapt selectors/flows as university portals evolve.
+- Selectors are placeholders and may need updates as portals change.
+- Use headless-safe drivers or provide a Selenium WebDriver via run(driver, context).
