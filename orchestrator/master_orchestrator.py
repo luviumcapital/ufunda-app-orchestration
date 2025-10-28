@@ -2,44 +2,54 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import json, time, os, logging
 from typing import List, Dict
-
 # Import bots
 from university_bots.stellenbosch_bot import Applicant as StellApplicant, StellenboschBot
 from university_bots.up_bot import Applicant as UPApplicant, UPBot
 from university_bots.wits_bot import Applicant as WitsApplicant, WitsBot
+# Newly added
+from university_bots.uj_bot import run as run_uj
+from university_bots.nsfas_bot import run as run_nsfas
 
 logger = logging.getLogger("orchestrator_parallel")
 logging.basicConfig(level=os.getenv("BOT_LOG_LEVEL", "INFO"))
-
 ARTIFACT_DIR = Path(os.getenv("ARTIFACT_DIR", "artifacts"))
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
-
 
 def _run_bot(bot_name: str, payload: Dict) -> Dict:
     try:
         if bot_name == "stellenbosch":
             app = StellApplicant(**payload)
             bot = StellenboschBot(app)
+            res = bot.run()
+            return {"bot": bot_name, "result": res.__dict__}
         elif bot_name == "up":
             app = UPApplicant(**payload)
             bot = UPBot(app)
+            res = bot.run()
+            return {"bot": bot_name, "result": res.__dict__}
         elif bot_name == "wits":
             app = WitsApplicant(**payload)
             bot = WitsBot(app)
+            res = bot.run()
+            return {"bot": bot_name, "result": res.__dict__}
+        elif bot_name == "uj":
+            # uj_bot uses generic run(driver, context) contract; here pass None driver for headless orchestrations
+            res = run_uj(driver=None, context=payload)
+            return {"bot": bot_name, "result": res}
+        elif bot_name == "nsfas":
+            res = run_nsfas(driver=None, context=payload)
+            return {"bot": bot_name, "result": res}
         else:
             raise ValueError(f"Unknown bot: {bot_name}")
-        res = bot.run()
-        return {"bot": bot_name, "result": res.__dict__}
     except Exception as e:
         logger.exception("Bot %s failed: %s", bot_name, e)
         return {"bot": bot_name, "error": str(e)}
-
 
 def run_parallel_bots(applicant_payload: Dict, bots: List[str] = None, max_workers: int = 3) -> Dict:
     """Run selected university bots in parallel threads.
     applicant_payload must satisfy Applicant schema used by each bot.
     """
-    bots = bots or ["stellenbosch", "up", "wits"]
+    bots = bots or ["stellenbosch", "up", "wits", "uj", "nsfas"]
     start = time.time()
     results = []
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
